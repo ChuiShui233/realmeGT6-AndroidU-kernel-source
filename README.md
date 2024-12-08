@@ -1,150 +1,110 @@
-# How do I submit patches to Android Common Kernels
+# 如何向 Android 通用内核提交补丁
 
-1. BEST: Make all of your changes to upstream Linux. If appropriate, backport to the stable releases.
-   These patches will be merged automatically in the corresponding common kernels. If the patch is already
-   in upstream Linux, post a backport of the patch that conforms to the patch requirements below.
-   - Do not send patches upstream that contain only symbol exports. To be considered for upstream Linux,
-additions of `EXPORT_SYMBOL_GPL()` require an in-tree modular driver that uses the symbol -- so include
-the new driver or changes to an existing driver in the same patchset as the export.
-   - When sending patches upstream, the commit message must contain a clear case for why the patch
-is needed and beneficial to the community. Enabling out-of-tree drivers or functionality is not
-not a persuasive case.
+1. 最佳做法：将所有更改都提交到上游 Linux。如果合适，请反向移植到稳定版本。
 
-2. LESS GOOD: Develop your patches out-of-tree (from an upstream Linux point-of-view). Unless these are
-   fixing an Android-specific bug, these are very unlikely to be accepted unless they have been
-   coordinated with kernel-team@android.com. If you want to proceed, post a patch that conforms to the
-   patch requirements below.
+这些补丁将自动合并到相应的通用内核中。如果补丁已在上游 Linux 中，请发布符合以下补丁要求的补丁反向移植。
 
-# Common Kernel patch requirements
+- 不要向上游发送仅包含符号导出的补丁。要考虑用于上游 Linux，
 
-- All patches must conform to the Linux kernel coding standards and pass `scripts/checkpatch.pl`
-- Patches shall not break gki_defconfig or allmodconfig builds for arm, arm64, x86, x86_64 architectures
-(see  https://source.android.com/setup/build/building-kernels)
-- If the patch is not merged from an upstream branch, the subject must be tagged with the type of patch:
-`UPSTREAM:`, `BACKPORT:`, `FROMGIT:`, `FROMLIST:`, or `ANDROID:`.
-- All patches must have a `Change-Id:` tag (see https://gerrit-review.googlesource.com/Documentation/user-changeid.html)
-- If an Android bug has been assigned, there must be a `Bug:` tag.
-- All patches must have a `Signed-off-by:` tag by the author and the submitter
+`EXPORT_SYMBOL_GPL()` 的添加需要使用符号的树内模块化驱动程序 - 因此请将
 
-Additional requirements are listed below based on patch type
+新驱动程序或对现有驱动程序的更改包含在与导出相同的补丁集中。
 
-## Requirements for backports from mainline Linux: `UPSTREAM:`, `BACKPORT:`
+- 在向上游发送补丁时，提交消息必须包含一个清晰的案例，说明为什么需要该补丁以及该补丁对社区有益。启用树外驱动程序或功能并不是一个有说服力的案例。
 
-- If the patch is a cherry-pick from Linux mainline with no changes at all
-    - tag the patch subject with `UPSTREAM:`.
-    - add upstream commit information with a `(cherry picked from commit ...)` line
-    - Example:
-        - if the upstream commit message is
+2. 不太好：从树外开发补丁（从上游 Linux 的角度来看）。除非这些补丁是修复 Android 特有的错误，否则它们不太可能被接受，除非它们已与 kernel-team@android.com 协调。如果您想继续，请发布符合以下补丁要求的补丁。
+
+# 通用内核补丁要求
+
+- 所有补丁都必须符合 Linux 内核编码标准并通过 `scripts/checkpatch.pl`
+- 补丁不得破坏 arm、arm64、x86、x86_64 架构的 gki_defconfig 或 allmodconfig 构建
+（请参阅 https://source.android.com/setup/build/building-kernels）
+- 如果补丁不是从上游分支合并的，则必须使用补丁类型标记主题：
+`UPSTREAM:`、`BACKPORT:`、`FROMGIT:`、`FROMLIST:` 或 `ANDROID:`。
+- 所有补丁都必须有一个 `Change-Id:` 标签（请参阅 https://gerrit-review.googlesource.com/Documentation/user-changeid.html）
+- 如果已分配 Android 错误，则必须有一个 `Bug:` 标签。
+- 所有补丁都必须有一个由作者和提交者签署的 `Signed-off-by:` 标签
+
+根据补丁类型，下面列出了其他要求
+
+## 从主线 Linux 反向移植的要求：`UPSTREAM:`、`BACKPORT:`
+
+- 如果补丁是从 Linux 主线中挑选出来的，没有任何变化
+- 用 `UPSTREAM:` 标记补丁主题。
+- 使用 `(cherry picking from commit ...)` 行添加上游提交信息
+- 示例：
+- 如果上游提交消息是
 ```
-        important patch from upstream
+来自上游的重要补丁
 
-        This is the detailed description of the important patch
+这是重要补丁的详细描述
 
-        Signed-off-by: Fred Jones <fred.jones@foo.org>
+签名人：Fred Jones <fred.jones@foo.org>
 ```
->- then Joe Smith would upload the patch for the common kernel as
+>- 那么 Joe Smith 会将通用内核的补丁上传为
 ```
-        UPSTREAM: important patch from upstream
+上游：来自上游的重要补丁
 
-        This is the detailed description of the important patch
+这是重要补丁的详细描述
 
-        Signed-off-by: Fred Jones <fred.jones@foo.org>
+签名人：Fred Jones <fred.jones@foo.org>
 
-        Bug: 135791357
-        Change-Id: I4caaaa566ea080fa148c5e768bb1a0b6f7201c01
-        (cherry picked from commit c31e73121f4c1ec41143423ac6ce3ce6dafdcec1)
-        Signed-off-by: Joe Smith <joe.smith@foo.org>
-```
-
-- If the patch requires any changes from the upstream version, tag the patch with `BACKPORT:`
-instead of `UPSTREAM:`.
-    - use the same tags as `UPSTREAM:`
-    - add comments about the changes under the `(cherry picked from commit ...)` line
-    - Example:
-```
-        BACKPORT: important patch from upstream
-
-        This is the detailed description of the important patch
-
-        Signed-off-by: Fred Jones <fred.jones@foo.org>
-
-        Bug: 135791357
-        Change-Id: I4caaaa566ea080fa148c5e768bb1a0b6f7201c01
-        (cherry picked from commit c31e73121f4c1ec41143423ac6ce3ce6dafdcec1)
-        [joe: Resolved minor conflict in drivers/foo/bar.c ]
-        Signed-off-by: Joe Smith <joe.smith@foo.org>
+Bug：135791357
+Change-Id：I4caaaa566ea080fa148c5e768bb1a0b6f7201c01
+(cherry picking from commit c31e73121f4c1ec41143423ac6ce3ce6dafdcec1)
+签名人：Joe Smith <joe.smith@foo.org>
 ```
 
-## Requirements for other backports: `FROMGIT:`, `FROMLIST:`,
-
-- If the patch has been merged into an upstream maintainer tree, but has not yet
-been merged into Linux mainline
-    - tag the patch subject with `FROMGIT:`
-    - add info on where the patch came from as `(cherry picked from commit <sha1> <repo> <branch>)`. This
-must be a stable maintainer branch (not rebased, so don't use `linux-next` for example).
-    - if changes were required, use `BACKPORT: FROMGIT:`
-    - Example:
-        - if the commit message in the maintainer tree is
+- 如果补丁需要对上游版本进行任何更改，请使用 `BACKPORT:`
+而不是 `UPSTREAM:` 标记补丁。
+- 使用与 `UPSTREAM:` 相同的标签
+- 在 `(cherry picking from commit ...)` 行下添加有关更改的注释
+- 示例：
 ```
-        important patch from upstream
+BACKPORT：来自上游的重要补丁
 
-        This is the detailed description of the important patch
+这是重要补丁的详细描述
 
-        Signed-off-by: Fred Jones <fred.jones@foo.org>
-```
->- then Joe Smith would upload the patch for the common kernel as
-```
-        FROMGIT: important patch from upstream
+签名人：Fred Jones <fred.jones@foo.org>
 
-        This is the detailed description of the important patch
-
-        Signed-off-by: Fred Jones <fred.jones@foo.org>
-
-        Bug: 135791357
-        (cherry picked from commit 878a2fd9de10b03d11d2f622250285c7e63deace
-         https://git.kernel.org/pub/scm/linux/kernel/git/foo/bar.git test-branch)
-        Change-Id: I4caaaa566ea080fa148c5e768bb1a0b6f7201c01
-        Signed-off-by: Joe Smith <joe.smith@foo.org>
+Bug：135791357
+Change-Id：I4caaaa566ea080fa148c5e768bb1a0b6f7201c01
+(cherry picking from commit c31e73121f4c1ec41143423ac6ce3ce6dafdcec1)
+[joe：解决了 drivers/foo/bar.c 中的小冲突 ]
+签名人：Joe Smith <joe.smith@foo.org>
 ```
 
+## 其他反向移植的要求：`FROMGIT:`， `FROMLIST:`，
 
-- If the patch has been submitted to LKML, but not accepted into any maintainer tree
-    - tag the patch subject with `FROMLIST:`
-    - add a `Link:` tag with a link to the submittal on lore.kernel.org
-    - add a `Bug:` tag with the Android bug (required for patches not accepted into
-a maintainer tree)
-    - if changes were required, use `BACKPORT: FROMLIST:`
-    - Example:
+- 如果补丁已合并到上游维护者树中，但尚未
+合并到 Linux 主线
+- 使用 `FROMGIT:` 标记补丁主题
+- 添加补丁来源信息为 `(cherry picking from commit <sha1> <repo> <branch>)`。这
+必须是一个稳定的维护者分支（未重新定基，因此不要使用 `linux-next` 作为示例）。
+- 如果需要更改，请使用 `BACKPORT: FROMGIT:`
+- 示例：
+- 如果维护者树中的提交消息是
 ```
-        FROMLIST: important patch from upstream
+来自上游的重要补丁
 
-        This is the detailed description of the important patch
+这是重要补丁的详细描述
 
-        Signed-off-by: Fred Jones <fred.jones@foo.org>
-
-        Bug: 135791357
-        Link: https://lore.kernel.org/lkml/20190619171517.GA17557@someone.com/
-        Change-Id: I4caaaa566ea080fa148c5e768bb1a0b6f7201c01
-        Signed-off-by: Joe Smith <joe.smith@foo.org>
+签名人：Fred Jones <fred.jones@foo.org>
 ```
-
-## Requirements for Android-specific patches: `ANDROID:`
-
-- If the patch is fixing a bug to Android-specific code
-    - tag the patch subject with `ANDROID:`
-    - add a `Fixes:` tag that cites the patch with the bug
-    - Example:
+>- 那么 Joe Smith 会将通用内核的补丁上传为
 ```
-        ANDROID: fix android-specific bug in foobar.c
+FROMGIT：来自上游的重要补丁
 
-        This is the detailed description of the important fix
+这是重要补丁的详细描述
 
-        Fixes: 1234abcd2468 ("foobar: add cool feature")
-        Change-Id: I4caaaa566ea080fa148c5e768bb1a0b6f7201c01
-        Signed-off-by: Joe Smith <joe.smith@foo.org>
+签名人：Fred Jones <fred.jones@foo.org>
+
+Bug：135791357
+（从提交 878a2fd9de10b03d11d2f622250285c7e63deace 中挑选
+https://git.kernel.org/pub/scm/linux/kernel/git/foo/bar.git test-branch)
+Change-Id： I4caaaa566ea080fa148c5e768bb1a0b6f7201c01
+签名人：Joe Smith <joe.smith@foo.org>
 ```
 
-- If the patch is a new feature
-    - tag the patch subject with `ANDROID:`
-    - add a `Bug:` tag with the Android bug (required for android-specific features)
+- 如果补丁已提交给 LKML，但未被接受
 
