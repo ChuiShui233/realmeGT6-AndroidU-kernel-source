@@ -12,10 +12,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 2. 克隆目标目录
-      - name: Clone realmeGT6 vendor directory
+      # 2. 禁用 Git LFS 并克隆仓库
+      - name: Clone realmeGT6 vendor directory (skip LFS)
         run: |
+          git config --global http.sslVerify false  # 如果需要跳过 SSL 验证（可选）
           git clone --depth 1 --branch master https://github.com/realme-kernel-opensource/realmeGT6-AndroidU-vendor-source.git temp-repo
+          cd temp-repo
+          GIT_LFS_SKIP_SMUDGE=1 git checkout master
           cp -r temp-repo/vendor ./vendor
           rm -rf temp-repo
 
