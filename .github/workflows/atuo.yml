@@ -15,11 +15,12 @@ jobs:
       # 2. 克隆目标目录
       - name: Clone realmeGT6 vendor directory
         run: |
-          git clone --depth 1 --branch master --no-checkout https://github.com/realme-kernel-opensource/realmeGT6-AndroidU-vendor-source.git temp-repo
+          git clone --depth 1 --branch master https://github.com/realme-kernel-opensource/realmeGT6-AndroidU-vendor-source.git temp-repo
           cd temp-repo
           git lfs install
           git lfs pull
-          cp -r vendor ../vendor
+          git checkout master -- vendor  # 检出 vendor 目录
+          cp -r vendor ../vendor  # 复制到当前仓库
           cd ..
           rm -rf temp-repo
 
