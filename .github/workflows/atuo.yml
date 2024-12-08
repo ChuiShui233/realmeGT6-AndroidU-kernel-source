@@ -6,7 +6,36 @@ on:
       - main  # 触发工作流的分支，可以根据需要修改
   pull_request:
     branches:
-      - main  # 也可以在PR合并时触发
+      - main  # 也可以在PR合并时触发name: Clone Vendor Directory
+
+on:
+  workflow_dispatch:  # 允许手动触发工作流
+
+jobs:
+  clone-vendor-directory:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # 1. 检出当前仓库代码
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 2. 克隆目标目录
+      - name: Clone realmeGT6 vendor directory
+        run: |
+          git clone --depth 1 --branch master https://github.com/realme-kernel-opensource/realmeGT6-AndroidU-vendor-source.git temp-repo
+          cp -r temp-repo/vendor ./vendor
+          rm -rf temp-repo
+
+      # 3. 提交并推送更改
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add vendor
+          git commit -m "Add realmeGT6 vendor directory" || echo "No changes to commit"
+          git push
+
 
 jobs:
   clone-vendor-directory:
