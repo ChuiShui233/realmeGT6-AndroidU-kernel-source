@@ -1,0 +1,30 @@
+name: Clone Vendor Directory
+
+on:
+  workflow_dispatch:
+
+jobs:
+  clone-vendor:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Clone vendor directory
+        run: |
+          git clone --depth=1 https://github.com/realme-kernel-opensource/realmeGT6-AndroidU-vendor-source temp-repo
+          cp -r temp-repo/vendor ./vendor
+          rm -rf temp-repo
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add vendor
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Update vendor directory"
+            git push
+          fi
